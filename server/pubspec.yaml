@@ -1,0 +1,13 @@
+name: carteira_server
+description: API REST simulada do app Carteira, usada no curso de Formação Mobile.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: '>=3.6.0 <4.0.0'
+
+dev_dependencies:
+  lints: ^5.0.0
+  test: ^1.25.6
+dependencies:
+  shelf_router: ^1.1.4
