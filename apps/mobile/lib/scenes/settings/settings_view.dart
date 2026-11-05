@@ -1,117 +1,61 @@
 import 'package:flutter/material.dart';
 
-class SettingsView extends StatefulWidget {
+class SettingsView extends StatelessWidget {
   const SettingsView({super.key});
 
   @override
-  State<SettingsView> createState() => _SettingsViewState();
-}
-
-class _SettingsViewState extends State<SettingsView> {
-  bool _notificationsEnabled = true;
-  bool _biometricsEnabled = false;
-  final String _selectedCurrency = 'Real (R\$)';
-
-  @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFF7B1FA2); // Roxo do Design System
-
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F6FA),
+      backgroundColor: const Color(0xFFF9F6F0),
       appBar: AppBar(
-        title: const Text(
-          'Configurações',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
-        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF1E293B)),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'Configurações',
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF1E293B),
+          ),
+        ),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          const Text(
-            'PREFERÊNCIAS',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey,
-              letterSpacing: 0.8,
+          ListTile(
+            leading: const Icon(Icons.notifications_outlined, color: Color(0xFF7B2CBF)),
+            title: const Text('Notificações'),
+            subtitle: const Text('Gerenciar alertas e avisos'),
+            trailing: Switch(
+              value: true,
+              activeColor: const Color(0xFF7B2CBF),
+              onChanged: (val) {},
             ),
           ),
-          const SizedBox(height: 12),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade200),
-            ),
-            child: Column(
-              children: [
-                SwitchListTile(
-                  title: const Text('Notificações Push', style: TextStyle(fontWeight: FontWeight.w500)),
-                  subtitle: const Text('Receber alertas de transações e faturas', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                  value: _notificationsEnabled,
-                  activeThumbColor: primaryColor,
-                  onChanged: (value) {
-                    setState(() {
-                      _notificationsEnabled = value;
-                    });
-                  },
-                ),
-                const Divider(height: 1),
-                SwitchListTile(
-                  title: const Text('Bloqueio por Biometria', style: TextStyle(fontWeight: FontWeight.w500)),
-                  subtitle: const Text('Exigir digital ou Face ID ao abrir', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                  value: _biometricsEnabled,
-                  activeThumbColor: primaryColor,
-                  onChanged: (value) {
-                    setState(() {
-                      _biometricsEnabled = value;
-                    });
-                  },
-                ),
-              ],
-            ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.lock_outline, color: Color(0xFF7B2CBF)),
+            title: const Text('Privacidade e Segurança'),
+            subtitle: const Text('Senha e biometria'),
+            onTap: () {},
           ),
-          const SizedBox(height: 24),
-          const Text(
-            'GERAL',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey,
-              letterSpacing: 0.8,
-            ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.palette_outlined, color: Color(0xFF7B2CBF)),
+            title: const Text('Tema do Aplicativo'),
+            subtitle: const Text('Roxo e Lilás padrão'),
+            onTap: () {},
           ),
-          const SizedBox(height: 12),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade200),
-            ),
-            child: Column(
-              children: [
-                ListTile(
-                  title: const Text('Moeda Principal', style: TextStyle(fontWeight: FontWeight.w500)),
-                  subtitle: Text(_selectedCurrency, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Moeda predefinida: Real (R\$)')),
-                    );
-                  },
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  title: const Text('Versão da Aplicação', style: TextStyle(fontWeight: FontWeight.w500)),
-                  subtitle: const Text('1.0.0 (Build 2026)', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                  trailing: const Icon(Icons.info_outline, size: 20, color: Colors.grey),
-                  onTap: () {}, // Corrigido de onPressed para onTap
-                ),
-              ],
-            ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.info_outline, color: Color(0xFF7B2CBF)),
+            title: const Text('Sobre o Aplicativo'),
+            subtitle: const Text('Versão 1.0.0'),
+            onTap: () {},
           ),
         ],
       ),

@@ -6,7 +6,7 @@ void main() {
   testWidgets('login screen shows the brand, two fields and a button', (
     tester,
   ) async {
-    await tester.pumpWidget(const CarteiraApp());
+    await tester.pumpWidget(const MyApp());
     expect(find.text('Carteira'), findsOneWidget);
     expect(find.byType(TextField), findsNWidgets(2));
     expect(find.widgetWithText(FilledButton, 'Entrar'), findsOneWidget);

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'scenes/login/login_factory.dart';
+import '../../../scenes/login/login_factory.dart';
 
 void main() {
   runApp(const MyApp());

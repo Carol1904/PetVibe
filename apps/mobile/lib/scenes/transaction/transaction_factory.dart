@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'transaction_view.dart';
+import 'new_transaction_view.dart';
 
 class TransactionFactory {
   static Widget create() {
-    return const TransactionView();
+    return const NewTransactionView();
   }
 }

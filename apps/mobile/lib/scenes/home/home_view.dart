@@ -1,491 +1,454 @@
-import 'package:carteira_design_system/carteira_design_system.dart';
 import 'package:flutter/material.dart';
-import '../login/login_factory.dart';
 import 'home_view_model.dart';
+import '../profile/profile_view.dart';
+import '../transaction/new_transaction_view.dart';
+import '../settings/settings_view.dart';
+
+class TransactionModel {
+  final String dateHeader;
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final String value;
+  final bool isPositive;
+  final String type;
+
+  const TransactionModel({
+    required this.dateHeader,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.value,
+    required this.isPositive,
+    required this.type,
+  });
+}
 
 class HomeView extends StatefulWidget {
-  const HomeView({required this.viewModel, super.key});
-
   final HomeViewModel viewModel;
+
+  const HomeView({super.key, required this.viewModel});
 
   @override
   State<HomeView> createState() => _HomeViewState();
 }
 
 class _HomeViewState extends State<HomeView> {
-  int _currentBottomTab = 0;
+  int _selectedMonthIndex = 0;
+  int _selectedFilterIndex = 0;
+  int _bottomNavIndex = 0;
+  String _searchQuery = '';
 
-  // Paleta oficial de Roxo / Lilás do Design System
-  static const primaryPurple = Color(0xFF7F3DFF);
-  static const lightPurpleBg = Color(0xFFEEE5FF);
-  static const darkPurpleText = Color(0xFF1E0E38);
-  static const surfaceBg = Color(0xFFFBF8FF);
+  final List<String> _months = const ['nov/2026', 'out/2026', 'set/2026', 'ago/2026', 'jul/2026'];
+  final List<String> _filters = const ['Todos', 'Receita', 'Despesa', 'Transf.'];
+
+  final Map<String, List<TransactionModel>> _transactionsByMonth = const {
+    'nov/2026': [
+      TransactionModel(
+        dateHeader: 'QUINTA-FEIRA, 5 DE NOVEMBRO',
+        icon: Icons.arrow_upward,
+        title: 'Supermercado Extra',
+        subtitle: 'Alimentação · Nubank',
+        value: '-R\$ 250,00',
+        isPositive: false,
+        type: 'Despesa',
+      ),
+      TransactionModel(
+        dateHeader: 'TERÇA-FEIRA, 3 DE NOVEMBRO',
+        icon: Icons.arrow_downward,
+        title: 'Salário ACME',
+        subtitle: 'Salário · Itaú',
+        value: '+R\$ 5.000,00',
+        isPositive: true,
+        type: 'Receita',
+      ),
+    ],
+    'out/2026': [
+      TransactionModel(
+        dateHeader: 'SEXTA-FEIRA, 30 DE OUTUBRO',
+        icon: Icons.swap_horiz,
+        title: 'Reserva de Emergência',
+        subtitle: 'Itaú → Poupança',
+        value: 'R\$ 1.000,00',
+        isPositive: true,
+        type: 'Transf.',
+      ),
+      TransactionModel(
+        dateHeader: 'QUARTA-FEIRA, 28 DE OUTUBRO',
+        icon: Icons.arrow_upward,
+        title: 'Conta de Luz',
+        subtitle: 'Moradia · Carteira',
+        value: '-R\$ 180,50',
+        isPositive: false,
+        type: 'Despesa',
+      ),
+    ],
+    'set/2026': [
+      TransactionModel(
+        dateHeader: 'DOMINGO, 27 DE SETEMBRO',
+        icon: Icons.swap_horiz,
+        title: 'Transferência para res...',
+        subtitle: 'Itaú → Nubank',
+        value: 'R\$ 1.500,00',
+        isPositive: true,
+        type: 'Transf.',
+      ),
+      TransactionModel(
+        dateHeader: 'SÁBADO, 26 DE SETEMBRO',
+        icon: Icons.arrow_upward,
+        title: 'Plano de saúde Amil',
+        subtitle: 'Saúde · Carteira',
+        value: '-R\$ 480,00',
+        isPositive: false,
+        type: 'Despesa',
+      ),
+      TransactionModel(
+        dateHeader: 'SEXTA-FEIRA, 25 DE SETEMBRO',
+        icon: Icons.arrow_upward,
+        title: 'Spotify',
+        subtitle: 'Lazer · Nubank',
+        value: '-R\$ 21,90',
+        isPositive: false,
+        type: 'Despesa',
+      ),
+    ],
+    'ago/2026': [
+      TransactionModel(
+        dateHeader: 'SEGUNDA-FEIRA, 31 DE AGOSTO',
+        icon: Icons.arrow_downward,
+        title: 'Freelance Web',
+        subtitle: 'Projetos · Nubank',
+        value: '+R\$ 2.200,00',
+        isPositive: true,
+        type: 'Receita',
+      ),
+    ],
+    'jul/2026': [
+      TransactionModel(
+        dateHeader: 'SEXTA-FEIRA, 31 DE JULHO',
+        icon: Icons.arrow_upward,
+        title: 'Compra Livro Flutter',
+        subtitle: 'Educação · Cartão',
+        value: '-R\$ 129,90',
+        isPositive: false,
+        type: 'Despesa',
+      ),
+    ],
+  };
 
   @override
-  void initState() {
-    super.initState();
-    widget.viewModel.loadData();
-  }
-
-  void _showNewTransactionModal(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
-      ),
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(ctx).viewInsets.bottom + AppSpacing.lg,
-          top: AppSpacing.lg,
-          left: AppSpacing.lg,
-          right: AppSpacing.lg,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Novo Lançamento',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: darkPurpleText),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close, color: darkPurpleText),
-                  onPressed: () => Navigator.of(ctx).pop(),
-                ),
-              ],
-            ),
-            const Gap.md(),
-            TextField(
-              decoration: InputDecoration(
-                labelText: 'Descrição',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
-              ),
-            ),
-            const Gap.sm(),
-            TextField(
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: 'Valor (R\$)',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
-              ),
-            ),
-            const Gap.lg(),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: primaryPurple,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
-              ),
-              onPressed: () {
-                Navigator.of(ctx).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Lançamento adicionado com sucesso!')),
-                );
-              },
-              child: const Text('Salvar'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-@override
   Widget build(BuildContext context) {
-    return AppScaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          widget.viewModel.onAddNewTransaction();
-          _showNewTransactionModal(context);
-        },
-        backgroundColor: primaryPurple,
-        foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.md),
-        ),
-        child: const Icon(Icons.add, size: 28),
-      ),
-      body: Container(
-        color: surfaceBg,
-        child: SafeArea(
-          child: Column(
-            children: [
-              Expanded(
-                child: AnimatedBuilder(
-                  animation: widget.viewModel,
-                  builder: (context, _) {
-                    if (widget.viewModel.isLoading) {
-                      return const Center(
-                        child: CircularProgressIndicator(color: primaryPurple),
-                      );
-                    }
+    final currentMonthKey = _months[_selectedMonthIndex];
+    final monthTransactions = _transactionsByMonth[currentMonthKey] ?? [];
 
-                    return Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 1000),
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.all(AppSpacing.lg),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              _buildHeader(context),
-                              const Gap.md(),
-                              _buildMonthSelector(context),
-                              const Gap.md(),
-                              _buildBalanceCard(context),
-                              const Gap.lg(),
-                              _buildCategorySection(context),
-                              const Gap.xl(),
-                              _buildSearchField(context),
-                              const Gap.md(),
-                              _buildFilterSegmentedControl(context),
-                              const Gap.md(),
-                              ..._buildTransactionList(context),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-              NavigationBar(
-                selectedIndex: _currentBottomTab,
-                backgroundColor: Colors.white,
-                onDestinationSelected: (index) {
-                  setState(() {
-                    _currentBottomTab = index;
-                  });
-                  if (index == 1) {
-                    widget.viewModel.onOpenProfile();
-                  }
-                },
-                indicatorColor: lightPurpleBg,
-                destinations: const [
-                  NavigationDestination(
-                    icon: Icon(Icons.receipt_long_outlined, color: Colors.grey),
-                    selectedIcon: Icon(Icons.receipt_long, color: primaryPurple),
-                    label: 'Lançamentos',
-                  ),
-                  NavigationDestination(
-                    icon: Icon(Icons.person_outline, color: Colors.grey),
-                    selectedIcon: Icon(Icons.person, color: primaryPurple),
-                    label: 'Perfil',
-                  ),
-                ],
-              ),
-            ],
+    final filteredTransactions = monthTransactions.where((tx) {
+      final matchesSearch = tx.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          tx.subtitle.toLowerCase().contains(_searchQuery.toLowerCase());
+      
+      if (_selectedFilterIndex == 1) {
+        return matchesSearch && tx.type == 'Receita';
+      } else if (_selectedFilterIndex == 2) {
+        return matchesSearch && tx.type == 'Despesa';
+      } else if (_selectedFilterIndex == 3) {
+        return matchesSearch && tx.type == 'Transf.';
+      }
+      return matchesSearch;
+    }).toList();
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF9F6F0),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: const Text(
+          'Carteira',
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF1E293B),
           ),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings_outlined, color: Color(0xFF1E293B)),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute<void>(builder: (context) => const SettingsView()),
+              );
+            },
+          ),
+        ],
       ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        const Column(
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Olá, Ana 👋', style: TextStyle(fontSize: 14, color: Colors.grey)),
-            Text('Carteira', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: darkPurpleText)),
-          ],
-        ),
-        Row(
-          children: [
-            IconButton(
-              icon: const Icon(Icons.person_outline, color: darkPurpleText),
-              tooltip: 'Perfil',
-              onPressed: () => widget.viewModel.onOpenProfile(),
+            SizedBox(
+              height: 40,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: _months.length,
+                itemBuilder: (context, index) {
+                  final isSelected = _selectedMonthIndex == index;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: ChoiceChip(
+                      label: Text(_months[index]),
+                      selected: isSelected,
+                      selectedColor: const Color(0xFF7B2CBF),
+                      labelStyle: TextStyle(
+                        color: isSelected ? Colors.white : const Color(0xFF334155),
+                        fontWeight: FontWeight.bold,
+                      ),
+                      backgroundColor: Colors.white,
+                      onSelected: (selected) {
+                        setState(() {
+                          _selectedMonthIndex = index;
+                        });
+                      },
+                    ),
+                  );
+                },
+              ),
             ),
-            IconButton(
-              icon: const Icon(Icons.settings_outlined, color: darkPurpleText),
-              tooltip: 'Configurações',
-              onPressed: () {},
-            ),
-            IconButton(
-              icon: const Icon(Icons.logout_rounded, color: darkPurpleText),
-              tooltip: 'Sair',
-              onPressed: () {
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (_) => LoginFactory.makeLoginScene()),
-                );
-              },
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMonthSelector(BuildContext context) {
-    final vm = widget.viewModel;
-
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: vm.months.map((month) {
-          final isSelected = vm.selectedMonth == month;
-          return Padding(
-            padding: const EdgeInsets.only(right: AppSpacing.xs),
-            child: ChoiceChip(
-              showCheckmark: false,
-              label: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (isSelected) const Icon(Icons.check, size: 16, color: Colors.white),
-                  if (isSelected) const SizedBox(width: 4),
-                  Text(month),
+            const SizedBox(height: 16),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
                 ],
               ),
-              selected: isSelected,
-              selectedColor: primaryPurple,
-              backgroundColor: lightPurpleBg,
-              labelStyle: TextStyle(
-                color: isSelected ? Colors.white : darkPurpleText,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                fontSize: 13,
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Saldo do mês',
+                          style: TextStyle(color: Colors.grey, fontSize: 14),
+                        ),
+                        Text(
+                          _selectedMonthIndex == 0 ? 'novembro de 2026' :
+                          _selectedMonthIndex == 1 ? 'outubro de 2026' :
+                          _selectedMonthIndex == 2 ? 'setembro de 2026' :
+                          _selectedMonthIndex == 3 ? 'agosto de 2026' : 'julho de 2026',
+                          style: const TextStyle(color: Colors.grey, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'R\$ 4.286,41',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1E293B),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Entradas\nR\$ 9.526,55',
+                          style: TextStyle(color: Colors.green, fontSize: 13, fontWeight: FontWeight.w500),
+                        ),
+                        Text(
+                          'Saídas\nR\$ 5.240,14',
+                          style: TextStyle(color: Colors.red, fontSize: 13, fontWeight: FontWeight.w500),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-              side: BorderSide(
-                color: isSelected ? primaryPurple : lightPurpleBg,
-              ),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm)),
-              onSelected: (selected) {
-                if (selected) vm.selectMonth(month);
-              },
             ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-
-  Widget _buildBalanceCard(BuildContext context) {
-    final vm = widget.viewModel;
-
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: lightPurpleBg),
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        boxShadow: [
-          BoxShadow(
-            color: primaryPurple.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          )
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text('Saldo do mês', style: TextStyle(color: Colors.grey, fontSize: 14)),
-              Text(
-                vm.selectedMonth == 'set/2026' ? 'setembro de 2026' : vm.selectedMonth,
-                style: const TextStyle(color: Colors.grey, fontSize: 12),
+            const SizedBox(height: 20),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade300),
               ),
-            ],
-          ),
-          const Gap.xs(),
-          const Text('R\$ 4.286,41', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: darkPurpleText)),
-          const Gap.md(),
-          const Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Entradas', style: TextStyle(color: Colors.grey, fontSize: 12)),
-                  Text('+ R\$ 9.526,55', style: TextStyle(color: Color(0xFF00A86B), fontWeight: FontWeight.bold)),
-                ],
+              child: TextField(
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value;
+                  });
+                },
+                decoration: const InputDecoration(
+                  hintText: 'Buscar por descrição',
+                  hintStyle: TextStyle(color: Colors.grey),
+                  prefixIcon: Icon(Icons.search, color: Colors.grey),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                ),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text('Saídas', style: TextStyle(color: Colors.grey, fontSize: 12)),
-                  Text('- R\$ 5.240,14', style: TextStyle(color: Color(0xFFFD3C4A), fontWeight: FontWeight.bold)),
-                ],
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              height: 40,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: _filters.length,
+                itemBuilder: (context, index) {
+                  final isSelected = _selectedFilterIndex == index;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: ChoiceChip(
+                      label: Text(_filters[index]),
+                      selected: isSelected,
+                      selectedColor: const Color(0xFF7B2CBF),
+                      labelStyle: TextStyle(
+                        color: isSelected ? Colors.white : const Color(0xFF334155),
+                        fontWeight: FontWeight.w600,
+                      ),
+                      backgroundColor: Colors.white,
+                      onSelected: (selected) {
+                        setState(() {
+                          _selectedFilterIndex = index;
+                        });
+                      },
+                    ),
+                  );
+                },
               ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCategorySection(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'POR CATEGORIA',
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.5,
-            color: Colors.grey,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.xs),
-        ...widget.viewModel.categories.map((c) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(c['name'], style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: darkPurpleText)),
-                      Row(
+            ),
+            const SizedBox(height: 20),
+            filteredTransactions.isEmpty
+                ? const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(20.0),
+                      child: Text('Nenhuma transação encontrada', style: TextStyle(color: Colors.grey)),
+                    ),
+                  )
+                : ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: filteredTransactions.length,
+                    itemBuilder: (context, index) {
+                      final tx = filteredTransactions[index];
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(c['amount'], style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: darkPurpleText)),
-                          const SizedBox(width: AppSpacing.sm),
-                          SizedBox(
-                            width: 32,
-                            child: Text(
-                              '${c['pct']}%',
-                              textAlign: TextAlign.end,
-                              style: const TextStyle(fontSize: 12, color: Colors.grey),
+                          if (index == 0 || filteredTransactions[index - 1].dateHeader != tx.dateHeader) ...[
+                            if (index > 0) const SizedBox(height: 16),
+                            Text(
+                              tx.dateHeader,
+                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey),
+                            ),
+                            const SizedBox(height: 8),
+                          ],
+                          Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.02),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFF3E8FF),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Icon(tx.icon, color: const Color(0xFF7B2CBF)),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          tx.title,
+                                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF1E293B)),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          tx.subtitle,
+                                          style: const TextStyle(color: Colors.grey, fontSize: 12),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                Text(
+                                  tx.value,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                    color: tx.isPositive ? const Color(0xFF1E293B) : Colors.red.shade700,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
-                      ),
-                    ],
+                      );
+                    },
                   ),
-                  const SizedBox(height: 6),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(AppRadius.sm),
-                    child: LinearProgressIndicator(
-                      value: c['val'],
-                      minHeight: 4,
-                      backgroundColor: lightPurpleBg,
-                      valueColor: const AlwaysStoppedAnimation<Color>(primaryPurple),
-                    ),
-                  ),
-                ],
-              ),
-            )),
-      ],
-    );
-  }
-
-  Widget _buildSearchField(BuildContext context) {
-    return TextField(
-      onChanged: widget.viewModel.updateSearchQuery,
-      decoration: InputDecoration(
-        hintText: 'Buscar por descrição',
-        hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
-        prefixIcon: const Icon(Icons.search, color: primaryPurple),
-        contentPadding: const EdgeInsets.symmetric(vertical: 14),
-        filled: true,
-        fillColor: Colors.white,
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppRadius.md),
-          borderSide: const BorderSide(color: lightPurpleBg),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppRadius.md),
-          borderSide: const BorderSide(color: primaryPurple),
+          ],
         ),
       ),
-    );
-  }
-
-  Widget _buildFilterSegmentedControl(BuildContext context) {
-    final vm = widget.viewModel;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: lightPurpleBg.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: lightPurpleBg),
-      ),
-      child: Row(
-        children: List.generate(vm.filters.length * 2 - 1, (index) {
-          if (index.isOdd) {
-            return Container(width: 1, height: 40, color: lightPurpleBg);
-          }
-          final filterName = vm.filters[index ~/ 2];
-          final isSelected = vm.selectedFilter == filterName;
-          return Expanded(
-            child: InkWell(
-              onTap: () => vm.selectFilter(filterName),
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-                decoration: BoxDecoration(
-                  color: isSelected ? primaryPurple : Colors.transparent,
-                  borderRadius: BorderRadius.circular(AppRadius.md),
-                ),
-                child: Text(
-                  filterName,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    color: isSelected ? Colors.white : darkPurpleText,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-            ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: const Color(0xFF7B2CBF),
+        child: const Icon(Icons.add, color: Colors.white),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute<void>(builder: (context) => const NewTransactionView()),
           );
-        }),
+        },
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _bottomNavIndex,
+        selectedItemColor: const Color(0xFF7B2CBF),
+        unselectedItemColor: Colors.grey,
+        onTap: (index) {
+          if (index == 1) {
+            Navigator.push(
+              context,
+              MaterialPageRoute<void>(builder: (context) => const ProfileView()),
+            );
+          } else {
+            setState(() {
+              _bottomNavIndex = index;
+            });
+          }
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.receipt_long),
+            label: 'Lançamentos',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            label: 'Perfil',
+          ),
+        ],
       ),
     );
-  }
-
-  List<Widget> _buildTransactionList(BuildContext context) {
-    final list = widget.viewModel.filteredTransactions;
-
-    if (list.isEmpty) {
-      return [
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
-          child: Center(
-            child: Text(
-              'Nenhum lançamento encontrado neste período.',
-              style: TextStyle(color: Colors.grey, fontSize: 14),
-            ),
-          ),
-        )
-      ];
-    }
-
-    return list.expand((t) => [
-      Padding(
-        padding: const EdgeInsets.only(top: AppSpacing.md, bottom: AppSpacing.xs),
-        child: Text(
-          (t['date'] as String).toUpperCase(),
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.8,
-            color: Colors.grey,
-          ),
-        ),
-      ),
-      ListTile(
-        contentPadding: EdgeInsets.zero,
-        leading: Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(color: t['bgColor'], borderRadius: BorderRadius.circular(AppRadius.md)),
-          child: Icon(t['icon'], color: t['color'], size: 20),
-        ),
-        title: Text(t['title'], style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: darkPurpleText)),
-        subtitle: Text(t['sub'], style: const TextStyle(fontSize: 13, color: Colors.grey)),
-        trailing: Text(t['amount'], style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: t['color'])),
-      ),
-    ]).toList();
   }
 }
