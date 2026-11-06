@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 
+// ============================================================================
+// CLASSE DA TELA DE NOVO LANÇAMENTO (NewTransactionView)
+// Widget com estado (StatefulWidget) responsável por exibir o formulário para
+// cadastro de novas despesas ou receitas na carteira digital.
+// ============================================================================
 class NewTransactionView extends StatefulWidget {
   const NewTransactionView({super.key});
 
@@ -8,7 +13,10 @@ class NewTransactionView extends StatefulWidget {
 }
 
 class _NewTransactionViewState extends State<NewTransactionView> {
+  // Estado local para controlar o tipo selecionado ('Despesa' ou 'Receita')
   String _type = 'Despesa';
+  
+  // Controladores de texto para capturar a descrição e o valor digitados
   final _titleController = TextEditingController();
   final _valueController = TextEditingController();
 
@@ -19,6 +27,7 @@ class _NewTransactionViewState extends State<NewTransactionView> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        // Botão para retornar à tela anterior
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF1E293B)),
           onPressed: () => Navigator.pop(context),
@@ -37,6 +46,7 @@ class _NewTransactionViewState extends State<NewTransactionView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Seletores de tipo de transação (Despesa / Receita) usando ChoiceChip
             Row(
               children: [
                 Expanded(
@@ -59,6 +69,8 @@ class _NewTransactionViewState extends State<NewTransactionView> {
               ],
             ),
             const SizedBox(height: 24),
+            
+            // Campo de texto para a descrição/título do lançamento
             TextField(
               controller: _titleController,
               decoration: InputDecoration(
@@ -68,6 +80,8 @@ class _NewTransactionViewState extends State<NewTransactionView> {
               ),
             ),
             const SizedBox(height: 16),
+            
+            // Campo de texto para o valor numérico da transação
             TextField(
               controller: _valueController,
               keyboardType: TextInputType.number,
@@ -78,6 +92,8 @@ class _NewTransactionViewState extends State<NewTransactionView> {
               ),
             ),
             const SizedBox(height: 32),
+            
+            // Botão de confirmação para salvar o lançamento e retornar
             SizedBox(
               width: double.infinity,
               height: 50,

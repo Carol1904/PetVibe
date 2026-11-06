@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 
+// ============================================================================
+// CLASSE DA TELA DE CONFIGURAÇÕES (SettingsView)
+// Widget sem estado (StatelessWidget) responsável por exibir as opções de
+// preferências do usuário, como notificações, privacidade, tema e informações.
+// ============================================================================
 class SettingsView extends StatelessWidget {
   const SettingsView({super.key});
 
@@ -10,6 +15,7 @@ class SettingsView extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        // Botão para retornar à tela anterior na pilha de navegação
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF1E293B)),
           onPressed: () => Navigator.pop(context),
@@ -26,17 +32,20 @@ class SettingsView extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
+          // Opção de Notificações com interruptor (Switch)
           ListTile(
             leading: const Icon(Icons.notifications_outlined, color: Color(0xFF7B2CBF)),
             title: const Text('Notificações'),
             subtitle: const Text('Gerenciar alertas e avisos'),
             trailing: Switch(
               value: true,
-              activeColor: const Color(0xFF7B2CBF),
+              activeThumbColor: const Color(0xFF7B2CBF),
               onChanged: (val) {},
             ),
           ),
           const Divider(),
+          
+          // Opção de Privacidade e Segurança
           ListTile(
             leading: const Icon(Icons.lock_outline, color: Color(0xFF7B2CBF)),
             title: const Text('Privacidade e Segurança'),
@@ -44,6 +53,8 @@ class SettingsView extends StatelessWidget {
             onTap: () {},
           ),
           const Divider(),
+          
+          // Opção de Personalização do Tema do Aplicativo
           ListTile(
             leading: const Icon(Icons.palette_outlined, color: Color(0xFF7B2CBF)),
             title: const Text('Tema do Aplicativo'),
@@ -51,6 +62,8 @@ class SettingsView extends StatelessWidget {
             onTap: () {},
           ),
           const Divider(),
+          
+          // Opção de Informações sobre o Aplicativo e Versão
           ListTile(
             leading: const Icon(Icons.info_outline, color: Color(0xFF7B2CBF)),
             title: const Text('Sobre o Aplicativo'),

@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 
+// ============================================================================
+// CLASSE DA TELA DE PERFIL (ProfileView)
+// Widget sem estado (StatelessWidget) responsável por exibir as informações
+// cadastrais do usuário, foto de perfil, opções de salvamento e botão de logout.
+// ============================================================================
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
 
@@ -23,6 +28,7 @@ class ProfileView extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            // Avatar / Iniciais da foto de perfil
             const Center(
               child: CircleAvatar(
                 radius: 50,
@@ -38,6 +44,8 @@ class ProfileView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
+            
+            // Nome do usuário em destaque
             const Text(
               'Ana Ribeiro',
               style: TextStyle(
@@ -47,16 +55,22 @@ class ProfileView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 4),
+            
+            // E-mail associado à conta
             const Text(
               'ana@carteira.dev',
               style: TextStyle(color: Colors.grey, fontSize: 14),
             ),
             const SizedBox(height: 4),
+            
+            // Data de cadastro na plataforma
             const Text(
               'Na Carteira desde 11/03/2024',
               style: TextStyle(color: Colors.grey, fontSize: 12),
             ),
             const SizedBox(height: 32),
+            
+            // Bloco de contêiner contendo os campos de dados do perfil
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -78,6 +92,8 @@ class ProfileView extends StatelessWidget {
                     style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey),
                   ),
                   const SizedBox(height: 12),
+                  
+                  // Campo somente leitura para o Nome
                   TextField(
                     readOnly: true,
                     controller: TextEditingController(text: 'Ana Ribeiro'),
@@ -88,6 +104,8 @@ class ProfileView extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
+                  
+                  // Campo somente leitura para a URL da foto
                   TextField(
                     readOnly: true,
                     controller: TextEditingController(text: 'https://github.com/anaribeiro'),
@@ -101,6 +119,8 @@ class ProfileView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
+            
+            // Botão principal para salvar alterações
             SizedBox(
               width: double.infinity,
               height: 50,
@@ -110,6 +130,7 @@ class ProfileView extends StatelessWidget {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 onPressed: () {
+                  // Exibe notificação visual de sucesso ao salvar
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Alterações salvas com sucesso!')),
                   );
@@ -118,6 +139,8 @@ class ProfileView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
+            
+            // Botão de destaque secundário para encerrar sessão (Logout)
             SizedBox(
               width: double.infinity,
               height: 50,

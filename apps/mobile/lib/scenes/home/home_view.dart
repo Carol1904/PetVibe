@@ -1,18 +1,14 @@
 import 'package:flutter/material.dart';
 import 'home_view_model.dart';
 import '../profile/profile_view.dart';
-import '../transaction/new_transaction_view.dart';
+import '../new_transaction/new_transaction_view.dart';
 import '../settings/settings_view.dart';
 
+// ============================================================================
+// MODELO DE DADOS (TransactionModel)
+// Representa a estrutura de cada transação exibida na tela.
+// ============================================================================
 class TransactionModel {
-  final String dateHeader;
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final String value;
-  final bool isPositive;
-  final String type;
-
   const TransactionModel({
     required this.dateHeader,
     required this.icon,
@@ -22,26 +18,48 @@ class TransactionModel {
     required this.isPositive,
     required this.type,
   });
+
+  final String dateHeader; // Cabeçalho da data (ex: QUINTA-FEIRA, 5 DE NOVEMBRO)
+  final IconData icon;     // Ícone da transação (seta para cima, para baixo, etc.)
+  final String title;      // Título principal (ex: Supermercado Extra)
+  final String subtitle;   // Categoria e conta (ex: Alimentação · Nubank)
+  final String value;      // Valor formatado (ex: -R$ 250,00)
+  final bool isPositive;   // Define a cor do valor (verde para entrada, vermelho para saída)
+  final String type;       // Tipo da transação para filtragem (Receita, Despesa, Transf.)
 }
 
+// ============================================================================
+// WIDGET STATEFUL DA TELA INICIAL (HomeView)
+// Permite gerenciar estados internos (meses selecionados, busca, filtros).
+// ============================================================================
 class HomeView extends StatefulWidget {
-  final HomeViewModel viewModel;
-
   const HomeView({super.key, required this.viewModel});
+  final HomeViewModel viewModel;
 
   @override
   State<HomeView> createState() => _HomeViewState();
 }
 
 class _HomeViewState extends State<HomeView> {
-  int _selectedMonthIndex = 0;
-  int _selectedFilterIndex = 0;
-  int _bottomNavIndex = 0;
-  String _searchQuery = '';
+  // --------------------------------------------------------------------------
+  // ESTADOS DA TELA
+  // Variáveis para controlar os filtros ativos e navegação da barra inferior.
+  // --------------------------------------------------------------------------
+  int _selectedMonthIndex = 0;   // Índice do mês selecionado no carrossel superior
+  int _selectedFilterIndex = 0;  // Índice do filtro ativo (0: Todos, 1: Receita, etc.)
+  int _bottomNavIndex = 0;       // Aba selecionada na BottomNavigationBar
+  String _searchQuery = '';      // Texto digitado no campo de busca
 
+  // Lista de meses disponíveis para navegação
   final List<String> _months = const ['nov/2026', 'out/2026', 'set/2026', 'ago/2026', 'jul/2026'];
+  
+  // Categorias de filtros rápidos
   final List<String> _filters = const ['Todos', 'Receita', 'Despesa', 'Transf.'];
 
+  // --------------------------------------------------------------------------
+  // BASE DE DADOS SIMULADA (MOCK)
+  // Mapeia o nome do mês para a sua respectiva lista de transações.
+  // --------------------------------------------------------------------------
   final Map<String, List<TransactionModel>> _transactionsByMonth = const {
     'nov/2026': [
       TransactionModel(
@@ -136,11 +154,19 @@ class _HomeViewState extends State<HomeView> {
     ],
   };
 
+  // ==========================================================================
+  // CONSTRUÇÃO DA INTERFACE (UI)
+  // ==========================================================================
   @override
   Widget build(BuildContext context) {
+    // Obtém o mês selecionado atualmente e busca suas transações
     final currentMonthKey = _months[_selectedMonthIndex];
     final monthTransactions = _transactionsByMonth[currentMonthKey] ?? [];
 
+    // ------------------------------------------------------------------------
+    // LÓGICA DE FILTRAGEM
+    // Filtra a lista com base na palavra buscada e no chip de filtro selecionado.
+    // ------------------------------------------------------------------------
     final filteredTransactions = monthTransactions.where((tx) {
       final matchesSearch = tx.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           tx.subtitle.toLowerCase().contains(_searchQuery.toLowerCase());
@@ -157,6 +183,11 @@ class _HomeViewState extends State<HomeView> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9F6F0),
+      
+      // ----------------------------------------------------------------------
+      // BARRA SUPERIOR (AppBar)
+      // Contém o título e o ícone de configurações.
+      // ----------------------------------------------------------------------
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -172,6 +203,7 @@ class _HomeViewState extends State<HomeView> {
           IconButton(
             icon: const Icon(Icons.settings_outlined, color: Color(0xFF1E293B)),
             onPressed: () {
+              // Navega para a tela de configurações
               Navigator.push(
                 context,
                 MaterialPageRoute<void>(builder: (context) => const SettingsView()),
@@ -180,11 +212,16 @@ class _HomeViewState extends State<HomeView> {
           ),
         ],
       ),
+
+      // ----------------------------------------------------------------------
+      // CORPO PRINCIPAL DA TELA (Body)
+      // ----------------------------------------------------------------------
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // 1. CARROSSEL DE MESES
             SizedBox(
               height: 40,
               child: ListView.builder(
@@ -214,6 +251,8 @@ class _HomeViewState extends State<HomeView> {
               ),
             ),
             const SizedBox(height: 16),
+
+            // 2. CARD RESUMO FINANCEIRO (Saldo, Entradas e Saídas)
             DecoratedBox(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -275,6 +314,8 @@ class _HomeViewState extends State<HomeView> {
               ),
             ),
             const SizedBox(height: 20),
+
+            // 3. CAMPO DE PESQUISA (Search TextField)
             DecoratedBox(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -297,6 +338,8 @@ class _HomeViewState extends State<HomeView> {
               ),
             ),
             const SizedBox(height: 16),
+
+            // 4. CHIPS DE FILTRAGEM DE CATEGORIA (Todos, Receita, Despesa, Transf.)
             SizedBox(
               height: 40,
               child: ListView.builder(
@@ -326,6 +369,8 @@ class _HomeViewState extends State<HomeView> {
               ),
             ),
             const SizedBox(height: 20),
+
+            // 5. LISTAGEM DAS TRANSAÇÕES FILTRADAS
             filteredTransactions.isEmpty
                 ? const Center(
                     child: Padding(
@@ -342,6 +387,7 @@ class _HomeViewState extends State<HomeView> {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          // Agrupador de data (exibe apenas se a data mudar em relação ao item anterior)
                           if (index == 0 || filteredTransactions[index - 1].dateHeader != tx.dateHeader) ...[
                             if (index > 0) const SizedBox(height: 16),
                             Text(
@@ -350,6 +396,8 @@ class _HomeViewState extends State<HomeView> {
                             ),
                             const SizedBox(height: 8),
                           ],
+                          
+                          // Card individual de transação
                           Container(
                             margin: const EdgeInsets.only(bottom: 12),
                             padding: const EdgeInsets.all(12),
@@ -412,6 +460,11 @@ class _HomeViewState extends State<HomeView> {
           ],
         ),
       ),
+
+      // ----------------------------------------------------------------------
+      // BOTÃO FLUTUANTE DE ADICIONAR (+)
+      // Navega para a tela de nova transação.
+      // ----------------------------------------------------------------------
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xFF7B2CBF),
         child: const Icon(Icons.add, color: Colors.white),
@@ -422,12 +475,18 @@ class _HomeViewState extends State<HomeView> {
           );
         },
       ),
+
+      // ----------------------------------------------------------------------
+      // BARRA DE NAVEGAÇÃO INFERIOR (BottomNavigationBar)
+      // Permite alternar entre a aba de Lançamentos e Perfil.
+      // ----------------------------------------------------------------------
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _bottomNavIndex,
         selectedItemColor: const Color(0xFF7B2CBF),
         unselectedItemColor: Colors.grey,
         onTap: (index) {
           if (index == 1) {
+            // Abre a tela de Perfil ao clicar na aba correspondente
             Navigator.push(
               context,
               MaterialPageRoute<void>(builder: (context) => const ProfileView()),

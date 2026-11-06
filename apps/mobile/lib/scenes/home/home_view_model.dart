@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 
 class HomeViewModel extends ChangeNotifier {
-  final dynamic coordinator;
-
   HomeViewModel({this.coordinator});
+  final dynamic coordinator;
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -20,7 +19,7 @@ class HomeViewModel extends ChangeNotifier {
   final List<String> months = ['out/2026', 'set/2026', 'ago/2026', 'jul/2026'];
   final List<String> filters = ['Todos', 'Receita', 'Despesa', 'Transf.'];
 
-  final List<Map<String, dynamic>> categories = [
+  final categories = [
     {'name': 'Moradia', 'amount': 'R\$ 3.027,16', 'pct': 58, 'val': 0.58},
     {'name': 'Saúde', 'amount': 'R\$ 883,90', 'pct': 17, 'val': 0.17},
     {'name': 'Alimentação', 'amount': 'R\$ 380,85', 'pct': 7, 'val': 0.07},
@@ -28,8 +27,7 @@ class HomeViewModel extends ChangeNotifier {
     {'name': 'Transporte', 'amount': 'R\$ 261,72', 'pct': 5, 'val': 0.05},
   ];
 
-  final List<Map<String, dynamic>> _allTransactions = [
-    // --- SETEMBRO / 2026 ---
+  final _allTransactions = [
     {
       'monthKey': 'set/2026',
       'date': 'Domingo, 27 de setembro',
@@ -85,8 +83,6 @@ class HomeViewModel extends ChangeNotifier {
       'color': const Color(0xFF5A626A),
       'bgColor': const Color(0xFFF1F3F5),
     },
-
-    // --- OUTUBRO / 2026 ---
     {
       'monthKey': 'out/2026',
       'date': 'Segunda-feira, 5 de outubro',
@@ -109,8 +105,6 @@ class HomeViewModel extends ChangeNotifier {
       'color': const Color(0xFFB35A46),
       'bgColor': const Color(0xFFF7EBE8),
     },
-
-    // --- AGOSTO / 2026 ---
     {
       'monthKey': 'ago/2026',
       'date': 'Quinta-feira, 20 de agosto',
@@ -124,8 +118,7 @@ class HomeViewModel extends ChangeNotifier {
     },
   ];
 
-  // Lógica de filtragem tripla (Mês Selecionado + Tipo de Filtro + Busca)
-  List<Map<String, dynamic>> get filteredTransactions {
+  get filteredTransactions {
     return _allTransactions.where((t) {
       final matchesMonth = t['monthKey'] == _selectedMonth;
       final matchesFilter = _selectedFilter == 'Todos' || t['type'] == _selectedFilter;
@@ -162,7 +155,7 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void onAddNewTransaction() {
+  void enableNewTransaction() {
     try {
       coordinator?.showCreateTransaction();
     } catch (_) {}

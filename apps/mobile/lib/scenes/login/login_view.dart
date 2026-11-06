@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import '../home/home_factory.dart';
 import 'login_view_model.dart';
 
+// ============================================================================
+// CLASSE DA TELA DE LOGIN (LoginView)
+// Widget com estado responsável por renderizar a interface de autenticação.
+// ============================================================================
 class LoginView extends StatefulWidget {
   const LoginView({required this.viewModel, super.key});
 
@@ -13,6 +17,7 @@ class LoginView extends StatefulWidget {
 }
 
 class _LoginViewState extends State<LoginView> {
+  // Cores padronizadas utilizadas nesta tela específica
   static const primaryPurple = Color(0xFF7F3DFF);
   static const lightPurpleBg = Color(0xFFEEE5FF);
   static const darkPurpleText = Color(0xFF1E0E38);
@@ -20,7 +25,7 @@ class _LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      body: Container(
+      body: ColoredBox(
         color: const Color(0xFFFBF8FF),
         child: SafeArea(
           child: Center(
@@ -28,6 +33,7 @@ class _LoginViewState extends State<LoginView> {
               padding: const EdgeInsets.all(AppSpacing.lg),
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 400),
+                // Ouve as alterações do ViewModel para reatividade da tela
                 child: AnimatedBuilder(
                   animation: widget.viewModel,
                   builder: (context, _) {
@@ -53,7 +59,7 @@ class _LoginViewState extends State<LoginView> {
                         ),
                         const Gap.lg(),
 
-                        // Título
+                        // Título e Subtítulo
                         const Text(
                           'Entrar',
                           textAlign: TextAlign.center,
@@ -74,7 +80,7 @@ class _LoginViewState extends State<LoginView> {
                         ),
                         const Gap.xl(),
 
-                        // Campo E-mail
+                        // Campo de Entrada: E-mail
                         TextField(
                           controller: widget.viewModel.emailController,
                           keyboardType: TextInputType.emailAddress,
@@ -100,7 +106,7 @@ class _LoginViewState extends State<LoginView> {
                         ),
                         const Gap.md(),
 
-                        // Campo Senha
+                        // Campo de Entrada: Senha
                         TextField(
                           controller: widget.viewModel.passwordController,
                           obscureText: true,
@@ -125,7 +131,7 @@ class _LoginViewState extends State<LoginView> {
                         ),
                         const Gap.lg(),
 
-                        // Botão de Entrar
+                        // Botão de Entrar e Lógica de Autenticação/Navegação
                         SizedBox(
                           height: 50,
                           child: ElevatedButton(
@@ -138,10 +144,12 @@ class _LoginViewState extends State<LoginView> {
                               elevation: 0,
                             ),
                             onPressed: widget.viewModel.isLoading
-                                ? null
+                                ? null // Desativa o botão enquanto carrega
                                 : () async {
-                                    // Ação de Login e Navegação para Home
+                                    // Executa a validação de login no ViewModel
                                     final success = await widget.viewModel.login();
+                                    
+                                    // Se bem-sucedido, redireciona para a Home
                                     if (success && context.mounted) {
                                       Navigator.of(context).pushReplacement(
                                         MaterialPageRoute(
@@ -149,6 +157,7 @@ class _LoginViewState extends State<LoginView> {
                                         ),
                                       );
                                     } else if (context.mounted) {
+                                      // Exibe mensagem de erro caso falhe
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         const SnackBar(
                                           content: Text('Credenciais inválidas ou erro no login.'),
